@@ -1,4 +1,7 @@
+import re
 from typing import Iterable, List
+
+import unicodedata
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 A2I = {c: i for i, c in enumerate(ALPHABET)}
@@ -35,9 +38,38 @@ def trouver_cles_possibles(
 
     return cles
 
-def antivigenere():
-    mot_chiffre = "LXFOPVEFRNHR"
-    dictionnaire = ["ATTACKATDAWN", "BONJOURMONDE", "HELLOWORLD"]
+def standardiser_chaine(s: str) -> str:
+    s = s.lower()
+    s = s.replace('œ', 'oe').replace('æ', 'ae')
+    s = unicodedata.normalize('NFD', s)
+    return re.sub(r'[\u0300-\u036f]', '', s)
+
+def charger_dictionnaire(chemin_fichier: str, taille: int):
+    """
+    Charge le dictionnaire, le pré-filtre et le pré-calcule pour l'optimisation.
+
+    Retourne une liste de tuples (mot, compteur_de_lettres_du_mot),
+    triée par longueur de mot décroissante.
+    """
+    mots_filtres = []
+
+    with open(chemin_fichier, 'r', encoding='utf-8') as f:
+        # Utilise un set pour une déduplication initiale rapide
+        # mots_uniques = set(mot.strip().lower() for mot in f if mot.strip())
+        # mots_uniques = set(standardiser_chaine(mot.strip().lower()) for mot in f if mot.strip())
+        mots_uniques = set(standardiser_chaine(mot.strip().lower()) for mot in f if len(mot.strip())==taille)
+
+    return list(mots_uniques)
+
+if __name__ == "__main__":
+    mot_chiffre = "ssklapyl"
+    taille = len(mot_chiffre)
+    # dictionnaire = ["ATTACKATDAWN", "BONJOURMONDE", "HELLOWORLD"]
+    fichier_dico = "liste.de.mots.francais.frgut.txt"
+    dictionnaire = charger_dictionnaire(fichier_dico, taille)
 
     cles = trouver_cles_possibles(mot_chiffre, dictionnaire)
-    print(cles)
+    i = 1
+    for clef in cles:
+        print(f"{i} : {clef}")
+        i += 1
