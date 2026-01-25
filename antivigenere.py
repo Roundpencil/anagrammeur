@@ -71,6 +71,7 @@ def identifier_sous_chaines(chaine_dentree:str, dictionnaire: Iterable[str],
     if not sortie_en_cours_exacte_complete:
         sortie_en_cours_exacte_complete = ([], [])
 
+    chaine_dentree = chaine_dentree.lower()
     if verbal :
         print(f"entrée = {chaine_dentree}, sortie en cours = {sortie_en_cours_exacte_complete}")
 
@@ -134,7 +135,7 @@ if __name__ == "__main__":
     dictionnaire = charger_dictionnaire(fichier_dico, ma_taille)
 
     cles = trouver_cles_possibles(mot_chiffre, dictionnaire)
-
+    cles = cles[:100]
     # i = 1
     # for clef in cles:
     #     print(f"{i} : {clef}")
