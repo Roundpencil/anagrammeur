@@ -1,5 +1,7 @@
+from datetime import *
 import re
 from typing import Iterable, List
+import json
 
 import unicodedata
 
@@ -121,13 +123,17 @@ def identifier_sous_chaines(chaine_dentree:str, dictionnaire: Iterable[str],
                 print(f"\tsolution ajoutée = {sortie_en_cours_exacte_complete}")
 
 
+def charger_sortie_json(path: str) -> list:
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
 
+    if not isinstance(data, list):
+        raise ValueError("Le JSON ne contient pas une liste en racine")
 
-
-
-    pass
+    return data
 
 if __name__ == "__main__":
+    print(datetime.now())
     mot_chiffre = "ssklapyl"
     ma_taille = len(mot_chiffre)
     # dictionnaire = ["ATTACKATDAWN", "BONJOURMONDE", "HELLOWORLD"]
@@ -135,7 +141,9 @@ if __name__ == "__main__":
     dictionnaire = charger_dictionnaire(fichier_dico, ma_taille)
 
     cles = trouver_cles_possibles(mot_chiffre, dictionnaire)
-    cles = cles[:100]
+    print(datetime.now())
+
+    cles = cles[:1000]
     # i = 1
     # for clef in cles:
     #     print(f"{i} : {clef}")
@@ -152,7 +160,19 @@ if __name__ == "__main__":
         if sortie:
             sortie_globale.append(sortie)
 
+    fin = datetime.now()
+
+    print(fin)
+    # Nom de fichier safe pour tous les OS
+    nom_fichier = fin.strftime("sortie_%Y-%m-%d_%H-%M-%S.json")
+
+    with open(nom_fichier, "w", encoding="utf-8") as f:
+        json.dump(sortie_globale, f, ensure_ascii=False, indent=2)
+
+    print(f"Sauvegarde effectuée dans {nom_fichier}")
+
     print(sortie_globale)
+
     i = 1
     for s in sortie_globale:
         print(f"{i} : {s}")
