@@ -66,28 +66,34 @@ def charger_dictionnaire(chemin_fichier: str, taille: int=0):
 
 def identifier_sous_chaines(chaine_dentree:str, dictionnaire: Iterable[str],
                             output:list[tuple[list[str], list[str]]],
-                            sortie_en_cours_exacte_complete: tuple[list[str], list[str]] = None):
+                            sortie_en_cours_exacte_complete: tuple[list[str], list[str]] = None,
+                            verbal = False):
     if not sortie_en_cours_exacte_complete:
         sortie_en_cours_exacte_complete = ([], [])
 
-    print(f"entrée = {chaine_dentree}, sortie en cours = {sortie_en_cours_exacte_complete}")
+    if verbal :
+        print(f"entrée = {chaine_dentree}, sortie en cours = {sortie_en_cours_exacte_complete}")
+
     for mot_dico in dictionnaire:
         if len(chaine_dentree) >= len(mot_dico):
             if chaine_dentree.startswith(mot_dico):
                 # si la chaine commence par le mot, on l'ajoute aux solutions possibles
-                print(f"la chaine {chaine_dentree} commence par {mot_dico}")
+                if verbal:
+                    print(f"la chaine {chaine_dentree} commence par {mot_dico}")
                 nouvelle_sortie_en_cours = (sortie_en_cours_exacte_complete[0].copy(),
                                             sortie_en_cours_exacte_complete[1].copy())
                 nouvelle_sortie_en_cours[0].append(mot_dico)
                 nouvelle_sortie_en_cours[1].append(mot_dico)
                 # puis on recurse s'il reste des lettres car on a réussi cette étape
                 if delta_taille := (len(chaine_dentree) - len(mot_dico)):
-                    print(f"deltataille = {delta_taille} > on récuse")
+                    if verbal:
+                        print(f"deltataille = {delta_taille} > on récuse")
                     nouvelle_chaine_entree = chaine_dentree[len(chaine_dentree)-delta_taille:]
                     return identifier_sous_chaines(nouvelle_chaine_entree, dictionnaire,
                                                    output, nouvelle_sortie_en_cours)
                 else:
-                    print(f"deltataille = {delta_taille} > on arrête là")
+                    if verbal:
+                        print(f"deltataille = {delta_taille} > on arrête là")
                     # sinon, s'il n'y a plus de lettres, on a fini la récursion complète
                     # on ajoute la solution aux solutions valides
                     code_retour = 0 # le code qui dit qu'on a une solution
@@ -101,15 +107,17 @@ def identifier_sous_chaines(chaine_dentree:str, dictionnaire: Iterable[str],
             # on va donc chercher dans les premières lettres du mot
             if mot_dico.startswith(chaine_dentree):
                 # si le mot_dico  commence par les lettres qu'il reste, on l'ajoute aux solutions possibles
-                print(f"le mot_dico {mot_dico} commence par les lettres qu'il reste({chaine_dentree}), "
+                if verbal:
+                    print(f"le mot_dico {mot_dico} commence par les lettres qu'il reste({chaine_dentree}), "
                       f"on l'ajoute aux solutions possibles")
                 nouvelle_sortie_en_cours = (sortie_en_cours_exacte_complete[0].copy(),
                                             sortie_en_cours_exacte_complete[1].copy())
                 nouvelle_sortie_en_cours[0].append(mot_dico[0:len(chaine_dentree)])
                 nouvelle_sortie_en_cours[1].append(mot_dico)
                 output.append(nouvelle_sortie_en_cours)
-                print(f"on arrête là")
-                print(f"\tsolution ajoutée = {sortie_en_cours_exacte_complete}")
+                if verbal:
+                    print(f"on arrête là")
+                    print(f"\tsolution ajoutée = {sortie_en_cours_exacte_complete}")
 
 
 
@@ -126,7 +134,22 @@ if __name__ == "__main__":
     dictionnaire = charger_dictionnaire(fichier_dico, ma_taille)
 
     cles = trouver_cles_possibles(mot_chiffre, dictionnaire)
+
+    # i = 1
+    # for clef in cles:
+    #     print(f"{i} : {clef}")
+    #     i += 1
+
+    #puis on croise les clefs avec les mots qu'on connait
+
+    dictionnaire = charger_dictionnaire(fichier_dico)
+    sortie_globale = []
+    for mot in cles:
+        sortie = []
+        identifier_sous_chaines(mot, dictionnaire, sortie)
+        sortie_globale.append(sortie)
+
     i = 1
-    for clef in cles:
-        print(f"{i} : {clef}")
-        i += 1
+    for s in sortie_globale:
+        print(f"{i} = {s}")
+
