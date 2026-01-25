@@ -67,7 +67,7 @@ def charger_dictionnaire(chemin_fichier: str, taille: int=0):
 def identifier_sous_chaines(chaine_dentree:str, dictionnaire: Iterable[str],
                             output:list[tuple[list[str], list[str]]],
                             sortie_en_cours_exacte_complete: tuple[list[str], list[str]] = None,
-                            verbal = False):
+                            verbal = True):
     if not sortie_en_cours_exacte_complete:
         sortie_en_cours_exacte_complete = ([], [])
 
@@ -117,7 +117,7 @@ def identifier_sous_chaines(chaine_dentree:str, dictionnaire: Iterable[str],
                 output.append(nouvelle_sortie_en_cours)
                 if verbal:
                     print(f"on arrête là")
-                    print(f"\tsolution ajoutée = {sortie_en_cours_exacte_complete}")
+                print(f"\tsolution ajoutée = {sortie_en_cours_exacte_complete}")
 
 
 
@@ -144,12 +144,16 @@ if __name__ == "__main__":
 
     dictionnaire = charger_dictionnaire(fichier_dico)
     sortie_globale = []
+
     for mot in cles:
         sortie = []
         identifier_sous_chaines(mot, dictionnaire, sortie)
-        sortie_globale.append(sortie)
+        if sortie:
+            sortie_globale.append(sortie)
 
+    print(sortie_globale)
     i = 1
     for s in sortie_globale:
-        print(f"{i} = {s}")
+        print(f"{i} : {s}")
+        i += 1
 
