@@ -44,7 +44,7 @@ def standardiser_chaine(s: str) -> str:
     s = unicodedata.normalize('NFD', s)
     return re.sub(r'[\u0300-\u036f]', '', s)
 
-def charger_dictionnaire(chemin_fichier: str, taille: int):
+def charger_dictionnaire(chemin_fichier: str, taille: int=0):
     """
     Charge le dictionnaire, le pré-filtre et le pré-calcule pour l'optimisation.
 
@@ -57,16 +57,73 @@ def charger_dictionnaire(chemin_fichier: str, taille: int):
         # Utilise un set pour une déduplication initiale rapide
         # mots_uniques = set(mot.strip().lower() for mot in f if mot.strip())
         # mots_uniques = set(standardiser_chaine(mot.strip().lower()) for mot in f if mot.strip())
-        mots_uniques = set(standardiser_chaine(mot.strip().lower()) for mot in f if len(mot.strip())==taille)
+        if taille:
+            mots_uniques = set(standardiser_chaine(mot.strip().lower()) for mot in f if len(mot.strip())==taille)
+        else:
+            mots_uniques = set(standardiser_chaine(mot.strip().lower()) for mot in f)
 
     return list(mots_uniques)
 
+def identifier_sous_chaines(chaine_dentree:str, dictionnaire: Iterable[str],
+                            output:list[tuple[list[str], list[str]]],
+                            sortie_en_cours_exacte_complete: tuple[list[str], list[str]] = None):
+    if not sortie_en_cours_exacte_complete:
+        sortie_en_cours_exacte_complete = ([], [])
+
+    print(f"entrée = {chaine_dentree}, sortie en cours = {sortie_en_cours_exacte_complete}")
+    for mot_dico in dictionnaire:
+        if len(chaine_dentree) >= len(mot_dico):
+            if chaine_dentree.startswith(mot_dico):
+                # si la chaine commence par le mot, on l'ajoute aux solutions possibles
+                print(f"la chaine {chaine_dentree} commence par {mot_dico}")
+                nouvelle_sortie_en_cours = (sortie_en_cours_exacte_complete[0].copy(),
+                                            sortie_en_cours_exacte_complete[1].copy())
+                nouvelle_sortie_en_cours[0].append(mot_dico)
+                nouvelle_sortie_en_cours[1].append(mot_dico)
+                # puis on recurse s'il reste des lettres car on a réussi cette étape
+                if delta_taille := (len(chaine_dentree) - len(mot_dico)):
+                    print(f"deltataille = {delta_taille} > on récuse")
+                    nouvelle_chaine_entree = chaine_dentree[len(chaine_dentree)-delta_taille:]
+                    return identifier_sous_chaines(nouvelle_chaine_entree, dictionnaire,
+                                                   output, nouvelle_sortie_en_cours)
+                else:
+                    print(f"deltataille = {delta_taille} > on arrête là")
+                    # sinon, s'il n'y a plus de lettres, on a fini la récursion complète
+                    # on ajoute la solution aux solutions valides
+                    code_retour = 0 # le code qui dit qu'on a une solution
+                    output.append(nouvelle_sortie_en_cours)
+                    # puis on laisse la boucle sur le dictionnaire se poursuivre
+                    print(f"\tsolution ajoutée = {sortie_en_cours_exacte_complete}")
+
+            # sinon : on ne fait rien, la boucle meurt d'elle meme
+        else:
+            # dans ce cas, on a une entrée plus lonque que le mot
+            # on va donc chercher dans les premières lettres du mot
+            if mot_dico.startswith(chaine_dentree):
+                # si le mot_dico  commence par les lettres qu'il reste, on l'ajoute aux solutions possibles
+                print(f"le mot_dico {mot_dico} commence par les lettres qu'il reste({chaine_dentree}), "
+                      f"on l'ajoute aux solutions possibles")
+                nouvelle_sortie_en_cours = (sortie_en_cours_exacte_complete[0].copy(),
+                                            sortie_en_cours_exacte_complete[1].copy())
+                nouvelle_sortie_en_cours[0].append(mot_dico[0:len(chaine_dentree)])
+                nouvelle_sortie_en_cours[1].append(mot_dico)
+                output.append(nouvelle_sortie_en_cours)
+                print(f"on arrête là")
+                print(f"\tsolution ajoutée = {sortie_en_cours_exacte_complete}")
+
+
+
+
+
+
+    pass
+
 if __name__ == "__main__":
     mot_chiffre = "ssklapyl"
-    taille = len(mot_chiffre)
+    ma_taille = len(mot_chiffre)
     # dictionnaire = ["ATTACKATDAWN", "BONJOURMONDE", "HELLOWORLD"]
     fichier_dico = "liste.de.mots.francais.frgut.txt"
-    dictionnaire = charger_dictionnaire(fichier_dico, taille)
+    dictionnaire = charger_dictionnaire(fichier_dico, ma_taille)
 
     cles = trouver_cles_possibles(mot_chiffre, dictionnaire)
     i = 1
