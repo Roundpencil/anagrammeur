@@ -2,7 +2,7 @@ from datetime import *
 import re
 from typing import Iterable, List
 import json
-
+from collections import defaultdict
 import unicodedata
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -67,7 +67,7 @@ def charger_dictionnaire(chemin_fichier: str, taille: int=0):
     return list(mots_uniques)
 
 def identifier_sous_chaines(chaine_dentree:str, dictionnaire: Iterable[str],
-                            output:list[tuple[list[str], list[str]]],
+                            output: list[tuple[list[str], list[str]]],
                             sortie_en_cours_exacte_complete: tuple[list[str], list[str]] = None,
                             verbal = True):
     if not sortie_en_cours_exacte_complete:
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     cles = trouver_cles_possibles(mot_chiffre, dictionnaire)
     print(datetime.now())
 
-    cles = cles[:1000]
+    # cles = cles[:1000]
     # i = 1
     # for clef in cles:
     #     print(f"{i} : {clef}")
