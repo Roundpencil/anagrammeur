@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import os
 import csv
 import sqlite3
+from typing import List, Tuple, Dict
+
 
 def telecharger_fichiers_adresse():
     # URL de la page avec les fichiers
@@ -120,6 +122,70 @@ def afficher_100_premieres_lignes(db_path: str="donnees.db", table: str = "commu
     for i, (libelle, afnor, code_postal) in enumerate(lignes, start=1):
         print(f"{i:3d} | {libelle} | {afnor} | {code_postal}")
 
+def rechercher_codes_postaux_et_voies(
+    mots: List[str],
+    db_path: str,
+    table_name: str
+) -> Dict[Tuple[str, str], List[str]]:
+    """
+    Retourne un dictionnaire :
+    clé = (code_postal, libelle_acheminement)
+    valeur = liste de nom_afnor contenant au moins un des mots,
+             seulement si tous les mots apparaissent pour ce code_postal.
+    """
+
+    if not mots:
+        return {}
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Récupérer toutes les lignes pour lesquelles nom_afnor contient au moins un mot
+    like_conditions = " OR ".join(["nom_afnor LIKE ?"] * len(mots))
+    query = f"""
+        SELECT code_postal, libelle_acheminement, nom_afnor
+        FROM {table_name}
+        WHERE {like_conditions}
+    """
+    params = [f"%{mot}%" for mot in mots]
+    cursor.execute(query, params)
+    lignes = cursor.fetchall()
+
+    # Organiser par code_postal + libelle_acheminement
+    regroupement = {}
+    for code_postal, libelle, nom_afnor in lignes:
+        key = (code_postal, libelle)
+        regroupement.setdefault(key, []).append(nom_afnor)
+
+    # Filtrer pour garder seulement ceux qui contiennent tous les mots
+    resultat_final = {}
+    for key, noms in regroupement.items():
+        mots_trouves = set()
+        for nom in noms:
+            for mot in mots:
+                if mot.lower() in nom.lower():
+                    mots_trouves.add(mot.lower())
+        if len(mots_trouves) == len(mots):
+            resultat_final[key] = noms
+
+    conn.close()
+    return resultat_final
+
+def tester_codes_postaux():
+    mots = ["MARrAUD"]
+    db_path = "donnees.db"
+    table_name = "communes"
+
+    mots = [mot.upper() for mot in mots]
+
+    resultats = rechercher_codes_postaux_et_voies(mots, db_path, table_name)
+
+    for (code_postal, libelle), voies in resultats.items():
+        print(f"{code_postal} - {libelle}:")
+        for voie in voies:
+            print("   ", voie)
+
 if __name__ == "__main__":
-    creer_bdd()
+    # creer_bdd()
     # afficher_100_premieres_lignes()
+    tester_codes_postaux()
