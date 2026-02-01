@@ -48,7 +48,7 @@ def telecharger_fichiers_adresse():
 
     print("Téléchargement terminé.")
 
-def creer_bdd():
+def creer_bdd(unelignepourtester: bool = False):
     # ====== PARAMÈTRES ======
     DOSSIER_CSV = "ban_csv"
     DB_PATH = "donnees.db"
@@ -64,7 +64,8 @@ def creer_bdd():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         libelle_acheminement TEXT,
        nom_afnor TEXT,
-       UNIQUE(libelle_acheminement, nom_afnor)
+       code_postal TEXT,
+       UNIQUE(libelle_acheminement, nom_afnor, code_postal)
     )
     """)
 
@@ -79,19 +80,21 @@ def creer_bdd():
                 print(reader)
 
                 lignes = [
-                    (row["libelle_acheminement"], row["nom_afnor"])
+                    (row["libelle_acheminement"], row["nom_afnor"], row["code_postal"])
                     for row in reader
-                    if "libelle_acheminement" in row and "nom_afnor" in row
+                    if "libelle_acheminement" in row and "nom_afnor" in row and "code_postal" in row
                 ]
                 print(f"lignes trouvée : {len(lignes)}")
 
                 cursor.executemany(
                     f"""
-                    INSERT INTO {TABLE_NAME} (libelle_acheminement, nom_afnor)
-                    VALUES (?, ?)
+                    INSERT OR IGNORE INTO {TABLE_NAME} (libelle_acheminement, nom_afnor, code_postal)
+                    VALUES (?, ?, ?)
                     """,
                     lignes
                 )
+        if unelignepourtester:
+            break
 
     # ====== VALIDATION ======
     conn.commit()
@@ -104,7 +107,7 @@ def afficher_100_premieres_lignes(db_path: str="donnees.db", table: str = "commu
     cursor = conn.cursor()
 
     cursor.execute(f"""
-    SELECT libelle_acheminement, nom_afnor
+    SELECT libelle_acheminement, nom_afnor, code_postal
     FROM {table}
     ORDER BY id
     LIMIT 100
@@ -114,8 +117,8 @@ def afficher_100_premieres_lignes(db_path: str="donnees.db", table: str = "commu
 
     conn.close()
 
-    for i, (libelle, afnor) in enumerate(lignes, start=1):
-        print(f"{i:3d} | {libelle} | {afnor}")
+    for i, (libelle, afnor, code_postal) in enumerate(lignes, start=1):
+        print(f"{i:3d} | {libelle} | {afnor} | {code_postal}")
 
 if __name__ == "__main__":
     creer_bdd()
