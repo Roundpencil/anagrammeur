@@ -172,7 +172,7 @@ def rechercher_codes_postaux_et_voies(
     return resultat_final
 
 def tester_codes_postaux():
-    mots = ["MARrAUD"]
+    mots = ["bretecher", "becassine"]
     db_path = "donnees.db"
     table_name = "communes"
 
