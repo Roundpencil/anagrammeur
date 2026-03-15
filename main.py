@@ -139,14 +139,34 @@ def resoudre_anagrammes(chaine_entree: str, chemin_dictionnaire: str) -> List[st
 # --- Point d'entrée du script ---
 if __name__ == "__main__":
     fichier_dico = "liste.de.mots.francais.frgut.txt"
-    chaine_test = "DUSOMEDAEX"
+    chaine_test = "TSNNMRNOIEMVEEC?U"
+    # chaine_test = "TSNNMRNOIEMVEECOU"
+    # chaine_test = "jetaime"
     resultats = resoudre_anagrammes(chaine_test, fichier_dico)
+    # i = 1
+    # taille_max = 3
+    # for resultat in resultats:
+    #     if len(resultat.split()) <= taille_max:
+    #         print(f"{i} : {resultat}")
+    #         i +=1
     i = 1
     taille_max = 3
+    format_taille = [3, 5, 9]
+    # format_taille = [1, 2, 4]
+
     for resultat in resultats:
-        if len(resultat.split()) <= taille_max:
-            print(f"{i} : {resultat}")
-            i +=1
+        print(f"resultat brut = {resultat}")
+        mots = resultat.split()
+
+        if len(mots) == taille_max:
+            sized_r = sorted(len(m) for m in mots)
+            print(f"{sized_r} == {format_taille} ?")
+
+            if sized_r == format_taille:
+                sorted_r = sorted(mots, key=lambda x: len(x))
+                # print(f"{i} : {resultat}")
+                print(f"\t{sorted_r[1]}, {sorted_r[0]}, {sorted_r[2]}")
+                i += 1
 
 def main():
     # Vérification des arguments de la ligne de commande

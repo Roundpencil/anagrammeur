@@ -162,11 +162,56 @@ if __name__ == "__main__":
     fichier_dico = "liste.de.mots.francais.frgut.txt"
     chaine_test = "DUSOMEDAEX"
     chaine_test = "TSNNRNOEIMVECUI"
-    resultat = resoudre_anagrammes(chaine_test, fichier_dico, 3, 0)
+    chaine_test = "TSNNMRNOIEMVEEC?U"
+    chaine_test = "TSNNMRNOIEMVEECOU"
+    chaine_test = "DUSOMEDNEX"
+    # format_taille = [1, 2, 4]
+    format_taille = [3, 5, 9]
+    format_taille = [3, 3, 4]
+    if sum(format_taille) != len(chaine_test):
+        raise ValueError("pas la meme taille de chaines")
+    resultats = resoudre_anagrammes(chaine_test, fichier_dico, 4, 0)
+    # i = 1
+    # for r in resultat:
+    #     print(f"{i} : {r}")
+    #     i = i+1
     i = 1
-    for r in resultat:
-        print(f"{i} : {r}")
-        i = i+1
+    taille_max = 3
+
+    # format_taille = [1, 2, 4]
+
+    # for resultat in resultats:
+    #     # print(f"\tresultat brut = {resultat}")
+    #     mots = resultat.split()
+    #
+    #     if len(mots) == taille_max:
+    #         sized_r = sorted(len(m) for m in mots)
+    #         # print(f"{sized_r} == {format_taille} ?")
+    #
+    #         if sized_r == format_taille:
+    #             sorted_r = sorted(mots, key=lambda x: len(x))
+    #             # print(f"{i} : {resultat}")
+    #             print(f"{sorted_r[1]}, {sorted_r[0]}, {sorted_r[2]}")
+    #             i += 1
+D
+    with open("resultats_filtrés.txt", "w", encoding="utf-8") as fichier:
+        # i = 0
+        for resultat in resultats:
+            mots = resultat.split()
+
+            if len(mots) == taille_max:
+                sized_r = sorted(len(m) for m in mots)
+
+                if sized_r == format_taille:
+                    sorted_r = sorted(mots, key=lambda x: len(x))
+
+                    # Affichage console
+                    print(f"{sorted_r[1]}, {sorted_r[0]}, {sorted_r[2]}")
+
+                    # Écriture dans le fichier dans le même ordre que l'affichage
+                    fichier.write(f"{sorted_r[1]}, {sorted_r[0]}, {sorted_r[2]}\n")
+
+                    # i += 1
 
 def main():
     parser = argparse.ArgumentParser(
